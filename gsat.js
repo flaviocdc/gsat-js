@@ -1,3 +1,5 @@
+load("utils.js");
+
 function Literal(clause, clause_index) {
   var index = Math.abs(clause[clause_index]);
   var not = clause[clause_index] < 0;
@@ -41,37 +43,6 @@ function Formula(num_literals) {
     return s;
   }
 };
-
-function main() {
-  print("Enter the number of restarts");
-  var retries = parseInt(readline());
-
-  print("Enter the number of flips");
-  var flips = parseInt(readline());
-
-  print("Enter the number of literals");
-  var num_literals = parseInt(readline());
-
-  print("Now enter the clauses.");
-  print("(3 numbers, separated by spaces, indicating the index of the literal)");
-  print("Type 'stop', to stop adding clauses");
-
-  var formula = new Formula(num_literals);
-
-  var line = readline();
-  do {
-    var numbers = line.split(" ").map(function(it) { return parseInt(it) });
-    print(numbers[0], numbers[1], numbers[2]);
-    formula.clauses.push(numbers);
-
-    line = readline();
-  } while (line != "stop");
-
-  var gsat = new GSAT(formula, retries, flips);
-  var truth = gsat.run();
-
-  print("Verdade: ", truth);
-}
 
 function GSAT(formula, retries, flips) {
   function generate_random_attribution() {
@@ -141,25 +112,3 @@ function GSAT(formula, retries, flips) {
     return forumla.ls;
   }
 }
-
-// utilities
-function print_2d_array(array) {
-  for (var i = 0; i < array.length; i++) {
-    for (var j = 0; j < array[i].length; j++) {
-      write(array[i][j], " ");
-    }
-    print();
-  }
-}
-
-function random_bool() {
-  var f = Math.random();
-  return f >= 0.5;
-}
-
-function random_int(max) {
-  return Math.floor(Math.random()*(max+1));
-}
-
-// main
-main();
