@@ -60,7 +60,7 @@ function GSAT(formula, retries, flips) {
 
     //print("currently_sat = ", currently_sat, " env = ", formula.ls);
 
-    var more_sat = [];
+    var better_sat = [];
     var max_sat = currently_sat;
     
     for (var i = 0; i < formula.ls.length; i++) {
@@ -70,20 +70,22 @@ function GSAT(formula, retries, flips) {
       var sat = formula.satisfied(new_ls);
       if (sat >= currently_sat) {
         //print("Encontrei uma atribuicao que atende melhor");
-        more_sat.push({ satisfied: sat, env : new_ls });
-        max_set = sat > max_sat ? sat : max_sat;
+        better_sat.push({ satisfied: sat, env : new_ls });
+        max_sat = Math.max(max_sat, sat);
       }
     }
 
-    //print("Total de atribs que atendem melhor: ", more_sat.length);
+    //print("Total de atribs que atendem melhor: ", better_sat.length);
+    //print("better_sat = ", better_sat.map(function(it) { return it.satisfied + " " + it.env }));
 
-    more_sat.filter(function(tuple) {
+    // best results
+    return_sat = better_sat.filter(function(tuple) {
       return tuple.satisfied >= max_sat;
     });
 
-    //print("Total de atribs que atendem melhor depois de filtrada: ", more_sat.length);
+    //print("Total de atribs que atendem melhor depois de filtrada: ", better_sat.length," max_sat = ",max_sat );
     
-    return more_sat;
+    return return_sat;
   }
 
   this.run = function() {
@@ -97,11 +99,15 @@ function GSAT(formula, retries, flips) {
           //print("Encontrei!");
           return formula.ls;
         } else {
-          more_sat = hillclimb(formula);
-          var rand_int = random_int(more_sat.length - 1); // generate random num between 0 and len(more_sat) - 1
-          
-          //print("more_sat.length = ", more_sat.length, " / rand_int = ", rand_int);
-          var tuple = more_sat[rand_int];
+          better_sat = hillclimb(formula);
+
+          if (better_sat.length == 0) {
+            // dead end?
+            break;
+          }
+
+          var rand_int = random_int(better_sat.length - 1); // generate random num between 0 and len(better_sat) - 1
+          var tuple = better_sat[rand_int];
           formula.ls = tuple.env;
         }
       }
@@ -109,6 +115,10 @@ function GSAT(formula, retries, flips) {
       print("Com a atribuicao inicial e o numero flips nao foi possivel encontrar uma solucao, tentar novamente");
     }
 
-    return forumla.ls;
+    if (formula.apply()) {
+      return formula.ls;
+    } else {
+      return false;
+    }
   }
 }
