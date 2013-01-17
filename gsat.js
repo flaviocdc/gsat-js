@@ -12,30 +12,23 @@
   print("(3 numbers, separated by spaces, indicating the index of the literal)");
   print("Type 'stop', to stop adding clauses");
 
+  function Literal(clause, clause_index) {
+    var index = Math.abs(clause[clause_index]);
+    var not = clause[clause_index] < 0;
+    
+    this.eval = function(env) {
+      var b = env[index];
+      return not ? !b : b;
+    }
+  }
+
   formula = {
     clauses : new Array(),
 
     ls : new Array(),
 
-    parseLiteral : function(clause, index) {
-      var _index = Math.abs(clause[index]);
-      var _not = clause[index] < 0;
-      return { index : _index, not : _not };
-    },
-
     evalClause : function(clause, env) {
-      var literal1 = this.parseLiteral(clause, 1);
-      var literal2 = this.parseLiteral(clause, 2);
-      var literal3 = this.parseLiteral(clause, 3);
-        
-      var bool1 = env[literal1.index];
-      var bool1 = literal1.not ? !bool1 : bool1;
-      var bool2 = env[literal2.index];
-      var bool2 = literal2.not ? !bool1 : bool1;
-      var bool3 = env[literal3.index];
-      var bool3 = literal3.not ? !bool1 : bool1;
-         
-      return bool1 || bool2 || bool3;
+      return new Literal(clause, 1).eval(env) || new Literal(clause, 2).eval(env) || new Literal(clause, 3).eval(env);
     },
 
     apply : function() {
