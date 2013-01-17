@@ -22,16 +22,17 @@
     }
   }
 
-  formula = {
-    clauses : new Array(),
+  function Formula(num_literals) {
+    this.clauses = new Array();
 
-    ls : new Array(),
+    this.ls = new Array();
+    this.ls.length = num_literals;
 
-    evalClause : function(clause, env) {
+    this.evalClause = function(clause, env) {
       return new Literal(clause, 1).eval(env) || new Literal(clause, 2).eval(env) || new Literal(clause, 3).eval(env);
-    },
+    };
 
-    apply : function() {
+    this.apply = function() {
       for (var i = 0; i < this.clauses.length; i++) {
         var clause = this.clauses[i];
         
@@ -40,9 +41,9 @@
       }
 
       return true;
-    },
+    };
 
-    satisfied : function(env) {
+    this.satisfied = function(env) {
       var s = 0;
 
       for (var i = 0; i < this.clauses.length; i++) {
@@ -53,10 +54,9 @@
 
       return s;
     }
-  }
-  
-  // TODO constructor?
-  formula.ls.length = num_literals;
+  };
+
+  formula = new Formula(num_literals);
 
   var line = readline();
   do {
