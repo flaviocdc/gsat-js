@@ -14,7 +14,7 @@ If you are using Archlinux, you should try to install a package named *v8*.
 After installing it you should simply checkout the project and follow this steps:
 
     cd <project-dir>
-    d8 gsat.js
+    d8 main.js
 
 Input
 =====
