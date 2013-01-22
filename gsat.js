@@ -1,71 +1,31 @@
 load("utils.js");
-
-function Literal(clause, clause_index) {
-  var index = Math.abs(clause[clause_index]);
-  var not = clause[clause_index] < 0;
-  
-  this.eval = function(env) {
-    var b = env[index];
-    return not ? !b : b;
-  }
-}
-
-function Formula(num_literals) {
-  this.clauses = new Array();
-
-  this.ls = [];
-  this.ls.length = num_literals;
-
-  this.evalClause = function(clause, env) {
-    return new Literal(clause, 1).eval(env) || new Literal(clause, 2).eval(env) || new Literal(clause, 3).eval(env);
-  };
-
-  this.apply = function() {
-    for (var i = 0; i < this.clauses.length; i++) {
-      var clause = this.clauses[i];
-      
-      var bool = this.evalClause(clause, this.ls);
-      if (!bool) return false;
-    }
-
-    return true;
-  };
-
-  this.satisfied = function(env) {
-    var s = 0;
-
-    for (var i = 0; i < this.clauses.length; i++) {
-      var clause = this.clauses[i];
-      var b = this.evalClause(clause, env);
-      if (b) s++;
-    }
-
-    return s;
-  }
-};
+load("formula.js");
 
 function GSAT(formula, retries, flips) {
+  assignment = [];
+  assignment.length = formula.num_literals;
+
   function generate_random_attribution() {
     var literals = [];
 
-    for (var i = 0; i < formula.ls.length; i++) {
+    for (var i = 0; i < assignment.length; i++) {
       literals[i] = random_bool();
     }
 
-    formula.ls = literals;
+    assignment = literals;
   }
 
   function hillclimb() {
-    var currently_sat = formula.satisfied(formula.ls);
+    var currently_sat = formula.satisfied(assignment);
 
-    //print("currently_sat = ", currently_sat, " env = ", formula.ls);
+    //print("currently_sat = ", currently_sat, " env = ", assignment);
 
     var better_sat = [];
     var max_sat = currently_sat;
     
-    for (var i = 0; i < formula.ls.length; i++) {
-      var new_ls = formula.ls.slice(0); // cloning the array
-      new_ls[i] = !formula.ls[i]; 
+    for (var i = 0; i < assignment.length; i++) {
+      var new_ls = assignment.slice(0); // cloning the array
+      new_ls[i] = !assignment[i]; 
 
       var sat = formula.satisfied(new_ls);
       if (sat >= currently_sat) {
@@ -91,15 +51,15 @@ function GSAT(formula, retries, flips) {
   this.run = function() {
     for (var i = 0; i < retries; i++) {
       generate_random_attribution(formula);
-      print("Generating random attr: ", formula.ls);
+      print("Generating random attr: ", assignment);
 
       for (var j = 0; j < flips; j++) {
         //print("Tentando verificar verdade");
-        if (formula.apply()) {
+        if (formula.apply(assignment)) {
           //print("Encontrei!");
-          return formula.ls;
+          return assignment;
         } else {
-          better_sat = hillclimb(formula);
+          better_sat = hillclimb();
 
           if (better_sat.length == 0) {
             // dead end?
@@ -108,15 +68,15 @@ function GSAT(formula, retries, flips) {
 
           var rand_int = random_int(better_sat.length - 1); // generate random num between 0 and len(better_sat) - 1
           var tuple = better_sat[rand_int];
-          formula.ls = tuple.env;
+          assignment = tuple.env;
         }
       }
 
       print("Com a atribuicao inicial e o numero flips nao foi possivel encontrar uma solucao, tentar novamente");
     }
 
-    if (formula.apply()) {
-      return formula.ls;
+    if (formula.apply(assignment)) {
+      return assignment;
     } else {
       return false;
     }

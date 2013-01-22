@@ -9,7 +9,7 @@ function Literal(clause, clause_index) {
 }
 
 function Formula(num_literals) {
-  this.clauses = new Array();
+  this.clauses = [];
   this.num_literals = num_literals;
 
   this.evalClause = function(clause, env) {
