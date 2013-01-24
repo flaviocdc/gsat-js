@@ -22,3 +22,9 @@ Input
 While inputing the clauses, you can use negative integers to represent negation of a literal.
 Example:
     1 -2 3 represents A + !B + C
+
+Random Input
+============
+
+You can run the following command to run GSAT with a random input.
+    d8 input-gen.js | d8 main.js
